@@ -7,6 +7,7 @@ import (
 	_ "io"
 	"log"
 	"net/http"
+	url2 "net/url"
 	"os"
 )
 
@@ -75,7 +76,7 @@ func handleWeather(w http.ResponseWriter, r *http.Request) {
 	}
 
 	weatherAPIKey := os.Getenv("WEATHER_API_KEY")
-	weatherResp, err := http.Get(fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=%s&q=%s", weatherAPIKey, viaCEPData.Localidade))
+	weatherResp, err := http.Get(fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=%s&q=%s", weatherAPIKey, url2.QueryEscape(viaCEPData.Localidade)))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

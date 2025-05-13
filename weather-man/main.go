@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -39,9 +41,25 @@ func handleZipCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Forward to Service B (weather-api-wrapper)
-	// For now, just return success
-	w.WriteHeader(http.StatusOK)
+	wrapperResp, err := http.Post(
+		"http://localhost:8081",
+		"application/json",
+		bytes.NewBuffer([]byte(fmt.Sprintf(`{"cep":"%s"}`, req.CEP))),
+	)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer wrapperResp.Body.Close()
+
+	w.WriteHeader(wrapperResp.StatusCode)
+	for k, v := range wrapperResp.Header {
+		w.Header()[k] = v
+	}
+
+	if _, err := io.Copy(w, wrapperResp.Body); err != nil {
+		log.Printf("Error copying response: %v", err)
+	}
 }
 
 func main() {
