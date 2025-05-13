@@ -4,12 +4,3 @@ Content-Type: application/json
 {
   "CEP": "88010301"
 }
-
-###
-
-POST http://localhost:8081
-Content-Type: application/json
-
-{
-"cep": "88010301"
-}
