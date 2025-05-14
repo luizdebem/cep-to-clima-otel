@@ -1,6 +1,6 @@
 # Desafio da Pós Go Expert
 
-## Cep to Clima + Open Telemetry
+## Cep to Clima + observabilidade com Open Telemetry
 
 Serviço A: weather-man
 
@@ -17,4 +17,4 @@ Resumidamente, o cliente chama o serviço weather-man que por sua vez chama o se
 
 Exemplo Zipkin:
 
-
+<img width="1552" alt="image" src="https://github.com/user-attachments/assets/5e674668-c512-49b6-9250-776b5c2136b9" />
