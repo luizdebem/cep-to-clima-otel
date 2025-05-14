@@ -1,0 +1,25 @@
+version: '3'
+services:
+  weather-man:
+    build:
+      context: ./weather-man
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - weather-api-wrapper
+      - zipkin
+
+  weather-api-wrapper:
+    build:
+      context: ./weather-api-wrapper
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - zipkin
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"

@@ -32,7 +32,7 @@ func validateZipCode(cep string) bool {
 }
 func initTracer() (*sdktrace.TracerProvider, error) {
 	exporter, err := zipkin.New(
-		"http://localhost:9411/api/v2/spans",
+		"http://zipkin:9411/api/v2/spans",
 		zipkin.WithLogger(log.New(io.Discard, "", log.LstdFlags)),
 	)
 	if err != nil {
@@ -74,16 +74,14 @@ func handleZipCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create HTTP request with context
 	body := bytes.NewBuffer([]byte(fmt.Sprintf(`{"cep":"%s"}`, req.CEP)))
-	wrapperReq, err := http.NewRequestWithContext(ctx, "POST", "http://localhost:8081", body)
+	wrapperReq, err := http.NewRequestWithContext(ctx, "POST", "http://weather-api-wrapper:8081", body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	wrapperReq.Header.Set("Content-Type", "application/json")
 
-	// Forward to weather-api-wrapper
 	wrapperResp, err := http.DefaultClient.Do(wrapperReq)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -91,16 +89,13 @@ func handleZipCode(w http.ResponseWriter, r *http.Request) {
 	}
 	defer wrapperResp.Body.Close()
 
-	// Copy headers first
 	for k, v := range wrapperResp.Header {
 		w.Header()[k] = v
 	}
 	w.Header().Set("Content-Type", "application/json")
 
-	// Then write status code
 	w.WriteHeader(wrapperResp.StatusCode)
 
-	// Copy response body
 	if _, err := io.Copy(w, wrapperResp.Body); err != nil {
 		log.Printf("Error copying response: %v", err)
 	}

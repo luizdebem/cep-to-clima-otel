@@ -52,7 +52,7 @@ func celsiusToKelvin(c float64) float64 {
 
 func initTracer() (*sdktrace.TracerProvider, error) {
 	exporter, err := zipkin.New(
-		"http://localhost:9411/api/v2/spans",
+		"http://zipkin:9411/api/v2/spans",
 		zipkin.WithLogger(log.New(io.Discard, "", log.LstdFlags)),
 	)
 	if err != nil {
@@ -90,7 +90,6 @@ func handleWeather(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ViaCEP request with tracing
 	_, viaCEPSpan := tracer.Start(ctx, "viacep-request")
 	viaCEPResp, err := http.Get(fmt.Sprintf("https://viacep.com.br/ws/%s/json/", req.CEP))
 	if err != nil {
@@ -114,9 +113,9 @@ func handleWeather(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// WeatherAPI request with tracing
 	_, weatherSpan := tracer.Start(ctx, "weather-request")
 	weatherAPIKey := os.Getenv("WEATHER_API_KEY")
+	println(weatherAPIKey)
 	weatherResp, err := http.Get(fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=%s&q=%s",
 		weatherAPIKey, url2.QueryEscape(viaCEPData.Localidade)))
 	if err != nil {
